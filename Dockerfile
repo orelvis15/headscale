@@ -10,4 +10,4 @@ RUN mkdir -p /var/lib/headscale
 EXPOSE 8080
 
 # Ejecuta el servidor correctamente
-CMD ["headscale", "serve"]
+CMD ["/ko-app/headscale", "serve"]
