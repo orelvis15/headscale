@@ -1,5 +1,5 @@
 # Headscale configuration
-server_url: http://localhost:8081
+server_url: headscale-production.up.railway.app
 listen_addr: 0.0.0.0:8080
 
 # gRPC configuration
