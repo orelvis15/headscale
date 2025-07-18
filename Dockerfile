@@ -10,5 +10,4 @@ RUN mkdir -p /var/lib/headscale
 EXPOSE 8080
 
 # Ejecuta el servidor correctamente
-ENTRYPOINT ["headscale"]
-CMD ["serve"]
+CMD ["headscale", "serve"]
