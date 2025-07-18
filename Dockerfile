@@ -9,5 +9,6 @@ RUN mkdir -p /var/lib/headscale
 # Puerto donde escucha headscale
 EXPOSE 8080
 
-# Ejecuta el servidor correctamente
-CMD ["/ko-app/headscale", "serve"]
+# La imagen oficial ya tiene el ENTRYPOINT configurado correctamente
+# Solo necesitamos especificar el comando
+CMD ["serve"]
