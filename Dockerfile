@@ -1,7 +1,9 @@
-FROM juanfont/headscale:latest
+FROM headscale/headscale:0.26.1
 
-COPY config.yaml /etc/headscale/config.yaml
+COPY ./config.yaml /etc/headscale/config.yaml
+RUN mkdir -p /var/lib/headscale
+EXPOSE 8080
 
-# No ENTRYPOINT
-# Usamos CMD con el comando completo
-CMD ["headscale", "serve"]
+# Sobrescribir el entrypoint problemático
+ENTRYPOINT []
+CMD ["/ko-app/headscale", "serve"]
