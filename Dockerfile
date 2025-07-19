@@ -6,4 +6,4 @@ EXPOSE 8080
 
 # Sobrescribir el entrypoint problemático
 ENTRYPOINT []
-CMD ["/ko-app/headscale", "serve"]
+CMD ["serve"]
