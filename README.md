@@ -170,8 +170,11 @@ docker exec headscale headscale preauthkeys list
 ## Comandos de Verificación
 
 ```bash
-# Ver nodos conectados
+# Ver nodos conectados con información detallada
 docker exec headscale headscale nodes list
+
+# Ver rutas aprobadas y disponibles
+docker exec headscale headscale nodes list-routes
 
 # Ver usuarios
 docker exec headscale headscale users list
@@ -182,8 +185,21 @@ docker exec headscale headscale preauthkeys list
 # Ver logs del contenedor
 docker logs headscale
 
-# Verificar desde navegador
+# Ver todos los comandos disponibles de headscale
+docker exec headscale headscale --help
+
+# Ver comandos específicos de nodes
+docker exec headscale headscale nodes --help
+
+# Verificar conectividad desde navegador
 # Visitar: http://192.168.0.169:8080
+```
+
+### Output típico de nodes list:
+```
+ID | Hostname  | Name               | User      | IP addresses                  | Connected | Expired
+1  | localhost | localhost          | miusuario | 100.64.0.6, fd7a:115c:a1e0::6 | online    | no
+2  | localhost | localhost-cfr6pdvj | orelvis   | 100.64.0.7, fd7a:115c:a1e0::7 | online    | no
 ```
 
 ## Configuración de Exit Nodes (Nodos de Salida)
@@ -194,15 +210,27 @@ docker logs headscale
 
 ### En el servidor (aprobar exit node):
 ```bash
-# Ver rutas anunciadas
-docker exec headscale headscale routes list
+# 1. Ver todos los nodos conectados para obtener sus IDs
+docker exec headscale headscale nodes list
 
-# Habilitar rutas de exit node (reemplazar ID según output anterior)
-docker exec headscale headscale routes enable -r 1  # IPv4
-docker exec headscale headscale routes enable -r 2  # IPv6
+# Output ejemplo:
+# ID | Hostname  | Name               | User      | IP addresses
+# 1  | localhost | localhost          | miusuario | 100.64.0.6, fd7a:115c:a1e0::6
+# 2  | localhost | localhost-cfr6pdvj | orelvis   | 100.64.0.7, fd7a:115c:a1e0::7
 
-# Verificar que están habilitadas
-docker exec headscale headscale routes list
+# 2. Ver rutas disponibles (inicialmente estará vacío)
+docker exec headscale headscale nodes list-routes
+
+# 3. Aprobar rutas IPv4 para cada nodo que quieres como exit node
+docker exec headscale headscale nodes approve-routes --identifier 1 --routes 0.0.0.0/0
+docker exec headscale headscale nodes approve-routes --identifier 2 --routes 0.0.0.0/0
+
+# 4. Aprobar rutas IPv6 para cada nodo
+docker exec headscale headscale nodes approve-routes --identifier 1 --routes ::/0
+docker exec headscale headscale nodes approve-routes --identifier 2 --routes ::/0
+
+# 5. Verificar que las rutas están aprobadas
+docker exec headscale headscale nodes list-routes
 ```
 
 ### En otros dispositivos (usar exit node):
@@ -210,22 +238,38 @@ docker exec headscale headscale routes list
 # Ver exit nodes disponibles
 tailscale exit-node list
 
-# Usar exit node específico
-tailscale set --exit-node <IP_DEL_ANDROID>
+# Usar exit node específico por IP
+tailscale set --exit-node 100.64.0.6
+
+# O usar exit node por nombre de hostname
+tailscale set --exit-node localhost
 
 # Desactivar exit node
 tailscale set --exit-node=
+
+# Permitir acceso a LAN local mientras usas exit node
+tailscale set --exit-node 100.64.0.6 --exit-node-allow-lan-access
 ```
 
 ## Solución de Problemas Comunes
 
-### Error: "user not found"
+### Error: "unknown command routes"
 ```bash
-# Verificar que el usuario existe
-docker exec headscale headscale users list
+# Comando incorrecto (no existe en esta versión):
+docker exec headscale headscale routes list
 
-# Usar ID numérico, no nombre de usuario
-docker exec headscale headscale nodes register --user 1 --key <CLAVE>
+# Comandos correctos:
+docker exec headscale headscale nodes list-routes
+docker exec headscale headscale nodes approve-routes --identifier <NODE_ID> --routes 0.0.0.0/0
+```
+
+### Configurar múltiples nodos como exit nodes
+```bash
+# Aprobar IPv4 e IPv6 para cada nodo por separado
+docker exec headscale headscale nodes approve-routes --identifier 1 --routes 0.0.0.0/0
+docker exec headscale headscale nodes approve-routes --identifier 1 --routes ::/0
+docker exec headscale headscale nodes approve-routes --identifier 2 --routes 0.0.0.0/0
+docker exec headscale headscale nodes approve-routes --identifier 2 --routes ::/0
 ```
 
 ### Error: "localhost:8080" en Android
@@ -282,8 +326,13 @@ docker volume rm headscale_data
 
 **✅ Estado de la Configuración:**
 - ✅ Headscale funcionando en Docker
-- ✅ Usuario creado y verificado
-- ✅ Android conectado exitosamente
-- ✅ Exit node configurado (opcional)
+- ✅ Múltiples usuarios creados (miusuario, orelvis)
+- ✅ Múltiples dispositivos conectados (2 nodos)
+- ✅ Exit nodes configurados para ambos nodos
+- ✅ Rutas IPv4 e IPv6 aprobadas
 
-**📱 Dispositivos Conectados:** Verificar con `docker exec headscale headscale nodes list`
+**📱 Dispositivos Conectados:**
+- **Nodo 1**: localhost (100.64.0.6) - Usuario: miusuario
+- **Nodo 2**: localhost-cfr6pdvj (100.64.0.7) - Usuario: orelvis
+
+**🌐 Exit Nodes Disponibles:** Verificar con `docker exec headscale headscale nodes list-routes`
