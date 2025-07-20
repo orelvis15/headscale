@@ -1,44 +1,44 @@
-# Headscale configuration
-server_url: headscale-production.up.railway.app
+# Cambia esto por tu IP real (NO localhost)
+server_url: http://192.168.0.169:8080
+
 listen_addr: 0.0.0.0:8080
-
-# gRPC configuration
+metrics_listen_addr: 0.0.0.0:9090
 grpc_listen_addr: 0.0.0.0:50443
-grpc_allow_insecure: false
 
-# Noise private key (required for Tailscale v2)
+private_key_path: /var/lib/headscale/private.key
+
 noise:
   private_key_path: /var/lib/headscale/noise_private.key
 
-# Database
-database:
-  type: sqlite3
-  sqlite:
-    path: /var/lib/headscale/db.sqlite
-
-# IP prefixes
 prefixes:
   v4: 100.64.0.0/10
   v6: fd7a:115c:a1e0::/48
+  allocation: sequential
 
-# DERP configuration
-derp:
-  server:
-    enabled: false
-  urls:
-    - https://controlplane.tailscale.com/derpmap/default
+database:
+  type: sqlite
+  sqlite:
+    path: /var/lib/headscale/db.sqlite
+    write_ahead_log: true
 
-# DNS configuration (updated syntax)
 dns:
+  magic_dns: true
   override_local_dns: true
+  base_domain: example.com
   nameservers:
     global:
       - 1.1.1.1
       - 8.8.8.8
-  search_domains: []
-  magic_dns: true
-  base_domain: example.com
 
-# Logging
+derp:
+  urls:
+    - https://controlplane.tailscale.com/derpmap/default
+  auto_update_enabled: true
+  update_frequency: 24h
+
 log:
   level: info
+  format: text
+
+# Habilitar API para comandos
+api_key: ""
