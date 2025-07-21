@@ -1,5 +1,5 @@
 # Cambia esto por tu IP real (NO localhost)
-server_url: http://192.168.0.169:8080
+server_url: http://zkwk4k400ssosw4ggksgc4os.46.62.162.200.sslip.io
 
 listen_addr: 0.0.0.0:8080
 metrics_listen_addr: 0.0.0.0:9090
